@@ -1,7 +1,7 @@
 {
-  "name": "your-library",
-  "version": "",
-  "description": "",
+  "name": "ttt-engine-minimax",
+  "version": "0.0.1",
+  "description": "tic-tac-toe game engine with minimax search",
   "main": "dist/index.js",
   "jsnext:main": "dist/index.es.js",
   "scripts": {
