@@ -2,7 +2,7 @@ import {opponent} from '../_lib/vars';
 import tttUtils   from '../_lib/ttt-utils';
 
 export function minimax({grid: _grid, ch, _ch = ch, level = Infinity, depth = 0}) {
-  if(depth > level || tttUtils.isFull(_grid)) {
+  if(depth > level || tttUtils.isFullAndDrawn(_grid) || depth > level) {
     return depth ? 0 : {draw: true};
   }
   
@@ -34,7 +34,7 @@ export function minimax({grid: _grid, ch, _ch = ch, level = Infinity, depth = 0}
       move = cell;
     }
   }
-  
+
   if(!depth) {
     grid[move] = ch;
     move = {move, ch};
@@ -43,7 +43,6 @@ export function minimax({grid: _grid, ch, _ch = ch, level = Infinity, depth = 0}
     if(win) {
       Object.assign(move, {win});
     }
-    
     return move;
   }
   

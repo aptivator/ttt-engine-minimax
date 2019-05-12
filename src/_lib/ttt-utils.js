@@ -23,8 +23,7 @@ export default {
     }
   },
 
-  
-  isFull(grid) {
+  isFullAndDrawn(grid) {
     let blanks = this.blanks(grid);
     let [ch, _ch] = Object.keys(opponent);
     let win = this.findWin(grid, ch);
