@@ -24,6 +24,17 @@ describe('minimax() engine', () => {
     expect(move).to.deep.equal({win: [0, 4, 8], ch: 'x'});
   });
   
+  it('finds a win by an opponent', () => {
+    let grid = [
+      'x', 'o', 'o',
+      'x', 'x', 'o',
+      'o', 'x', 'x'
+    ];
+    
+    let move = minimax({grid, ch: 'o'});
+    expect(move).to.deep.equal({win: [0, 4, 8], ch: 'x'});
+  });
+  
   it('finds a winning move and returns a win', () => {
     let grid = [
       'x', 'o', 'o',
