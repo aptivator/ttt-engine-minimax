@@ -1,50 +1,48 @@
-import {opponent} from '../_lib/vars';
-import tttUtils   from '../_lib/ttt-utils';
+import {findWin, getBlankCells, isFullAndDrawn} from '../_lib/ttt-utils';
+import {opponent}                               from '../_lib/vars';
 
-export function minimax({grid: _grid, ch, _ch = ch, level = Infinity, depth = 0}) {
-  if(depth > level || tttUtils.isFullAndDrawn(_grid) || depth > level) {
-    return depth ? 0 : {draw: true};
-  }
-  
-  let win = tttUtils.findWin(_grid, ch);
-  
-  if(win) {
-    return depth ? 10 - depth : {win, ch};
-  }
-  
-  win = tttUtils.findWin(_grid, opponent[ch]);
-  
-  if(win) {
-    return depth ? depth - 10 : {win, ch: opponent[ch]};
-  }
-  
-  let maximizing = ch === _ch;
-  let minmax = maximizing ? -Infinity : Infinity;
-  let grid = _grid.slice();
-  let blanks = tttUtils.blanks(_grid);
-  let move;
-  
-  for(let cell of blanks) {
-    grid[cell] = _ch;
-    let score = minimax({grid, ch, _ch: opponent[_ch], level, depth: depth + 1});
-    grid[cell] = null;
-
-    if(maximizing && score > minmax || !maximizing && score < minmax) {
-      minmax = score;
-      move = cell;
-    }
+function scoreBoard({board, ch, level, depth}) {
+  if(depth > level) {
+    return 0;
   }
 
-  if(!depth) {
-    grid[move] = ch;
-    move = {move, ch};
-    win = tttUtils.findWin(grid, ch);
+  if(findWin(board, ch)) {
+    return 10 - depth;
+  }
+
+  if(findWin(board, opponent[ch])) {
+    return depth - 10;
+  }
+
+  if(isFullAndDrawn(board)) {
+    return 0;
+  }
+}
+
+export function minimax({board, ch, ch_ = ch, level, moves = [], depth = 0}) {
+  let score = scoreBoard({board, ch, level, depth});
+
+  if(typeof score === 'undefined') {
+    let maximizing = ch === ch_;
+    let minmax = maximizing ? -Infinity : Infinity;
+    let blanks = getBlankCells(board);
+    board = board.slice();
     
-    if(win) {
-      Object.assign(move, {win});
+    for(let cell of blanks) {
+      board[cell] = ch_;
+      let {score} = minimax({board, ch, ch_: opponent[ch_], level, moves: false, depth: depth + 1});
+      board[cell] = null;
+
+      if(maximizing && score > minmax || !maximizing && score < minmax) {
+        minmax = score;
+        moves && (moves = [cell]);
+      } else if(moves && score === minmax) {
+        moves.push(cell);
+      }
     }
-    return move;
+
+    return {score: minmax, moves};
   }
-  
-  return minmax;
+
+  return {score};
 }

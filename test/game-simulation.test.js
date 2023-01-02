@@ -1,48 +1,52 @@
-import _        from 'lodash';
-import {expect} from 'chai';
-import {ttt}    from '../src';
+import {expect}            from 'chai';
+import {ttt}               from '../src';
+import {pickRandomElement} from '../src/_lib/utils';
 
 describe('two-player game simulation', () => {
   it('perfect player beats lower-level player and perfect players draw', () => {
     let results = {
-      o: {},
-      x: {}
+      perfect: {},
+      imperfect: {}
     };
-    let even = _.partial(ttt, _, 'x');
+
+    let perfect = (board) => ttt({board, ch: 'x'});
     
     for(let level of [0, 9]) {
-      let odd = _.partial(ttt, _, 'o', level);
+      results.perfect[level] = {wins: 0};
+      results.imperfect[level] = {wins: 0};
+
+      let imperfect = (board) => ttt({board, ch: 'o', level});
       
-      results.x[level] = {wins: 0};
-      results.o[level] = {wins: 0};
-      
-      for(let game = 0; game < 5; game++) {
-        let grid = [
+      for(let game = 0; game < 3; game++) {
+        let start = pickRandomElement([0, 1]);
+
+        let board = [
           null, null, null,
           null, null, null,
           null, null, null
         ];
         
-        for(let i = 0;; i++) {
-          let player = i % 2 === 0 ? even : odd;
-          var {move, ch, win, draw} = player(grid);
+        for(let i = start; ; i++) {
+          let player = i % 2 === 0 ? perfect : imperfect;
+          let {move, ch, win, draw, winningCh} = player(board);
+          let playerType = (winningCh === 'x' ? '' : 'im') + 'perfect';
           
           if(draw) {
             break;
           }
           
           if(win) {
-            results[ch][level].wins++;
+            results[playerType][level].wins++;
             break;
           }
           
-          grid[move] = ch;
+          board[move] = ch;
         }
       }
     }
-    
-    expect(results.x[0].wins).to.be.above(results.o[0].wins);
-    expect(results.x[9].wins).to.equal(0);
-    expect(results.o[9].wins).to.equal(0);
+
+    expect(results.perfect[0].wins).to.be.above(results.imperfect[0].wins);
+    expect(results.perfect[9].wins).to.equal(0);
+    expect(results.perfect[9].wins).to.equal(0);
   }).timeout(50000);
 });

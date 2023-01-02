@@ -1,44 +1,53 @@
-import {wins, opponent} from './vars';
+import {opponent, wins} from './vars';
 
-export default {
-  blanks(grid) {
-    return grid.reduce((blanks, ch, index) => {
-      if(!ch) {
-        blanks.push(index);
+export function findWin(board, ch) {
+  winsLoop:
+  for(let win of wins) {
+    for(let cell of win) {
+      if(board[cell] !== ch) {
+        continue winsLoop;
       }
-      
-      return blanks;
-    }, []);  
-  },
-  
-  findWin(grid, ch) {
-    winsLoop: for(let win of wins) {
-      for(let cell of win) {
-        if(grid[cell] !== ch) {
-          continue winsLoop;
-        }
-      }
-      
-      return win;
     }
-  },
 
-  isFullAndDrawn(grid) {
-    let blanks = this.blanks(grid);
-    let [ch, _ch] = Object.keys(opponent);
-    let win = this.findWin(grid, ch);
-    let _win = this.findWin(grid, _ch);
-    
-    if(!blanks.length && !win && !_win) {
-      return true;
-    }
-  },
-  
-  normalizeGrid(grid) {
-    if(!Array.isArray(grid)) {
-      grid = grid.split('').map(ch => ch === ' ' ? null : ch);
-    }
-    
-    return grid;
+    return win;
   }
-};
+}
+
+export function findWinOrDraw(board, ch) {
+  let win = findWin(board, ch);
+
+  if(win) {
+    return {win, winningCh: ch};
+  }
+
+  if(isFullAndDrawn(board)) {
+    return {draw: true};
+  }
+}
+
+export function getBlankCells(board) {
+  for(var blankCells = [], i = 0, {length} = board; i < length; i++) {
+    if(!board[i]) {
+      blankCells.push(i);
+    }
+  }
+
+  return blankCells;
+}
+
+export function isFullAndDrawn(board) {
+  let blanks = getBlankCells(board);
+
+  if(!blanks.length) {
+    let [ch, ch_] = Object.keys(opponent);
+    return !findWin(board, ch) && !findWin(board, ch_);
+  }
+}
+
+export function normalizeBoard(board) {
+  if(typeof board === 'string') {
+    board = board.split('').map((ch) => ch === ' ' ? null : ch);
+  }
+
+  return board;
+}
